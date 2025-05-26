@@ -61,6 +61,5 @@ jobs:
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
-          app-name: 'HeartSync'
-          slot-name:
+          app-name: 'heartsync-aabsavdvd4cxd2df'
           package: '.'
