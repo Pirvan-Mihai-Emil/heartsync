@@ -62,9 +62,5 @@ jobs:
         id: deploy-to-webapp
         with:
           app-name: 'HeartSync'
-          package: '.'
 
-      - name: Run Symfony post-deploy commands
-        run: |
-          php bin/console cache:clear
-          php bin/console doctrine:migrations:migrate --no-interaction
+          package: '.'
