@@ -1,0 +1,176 @@
+<div class="h-24"></div>
+
+<div class="accordion-wrapper">
+
+  <div class="patient-info-card">
+    <h2>👤 Patient Information</h2>
+    <div class="patient-info">
+      <p><strong>Full Name:</strong> {{ patient.firstName }} {{ patient.lastName }}</p>
+      <p><strong>Sex:</strong> {{ patient.sex }}</p>
+      <p><strong>CNP:</strong> {{ patient.cnp }}</p>
+    </div>
+  </div>
+
+  <mat-expansion-panel>
+  <mat-expansion-panel-header>
+    <mat-panel-title>
+      <h2>Current Alarms</h2>
+    </mat-panel-title>
+    <mat-panel-description>
+      🔔 Active alarms configuration
+    </mat-panel-description>
+  </mat-expansion-panel-header>
+
+  <ng-container *ngIf="alarms.length > 0; else noCurrentAlarms">
+    <div *ngFor="let alarm of activeAlarms; let i = index">
+      <section *ngIf="editingAlarmIndex !== i">
+        <p><strong>Parameter:</strong> {{ alarm.parameter }}</p>
+        <p><strong>Min:</strong> {{ alarm.minValue }}</p>
+        <p><strong>Max:</strong> {{ alarm.maxValue }}</p>
+        <p><strong>Duration:</strong> {{ alarm.durationMinutes }} sec</p>
+        <p><strong>Message:</strong> {{ alarm.message }}</p>
+        <p><strong>Is Active:</strong> {{ alarm.isActive ? 'Yes' : 'No' }}</p>
+
+        <button mat-icon-button aria-label="Edit" (click)="enableEdit(i)">
+          <mat-icon>edit</mat-icon>
+        </button>
+      </section>
+
+      <!-- Edit form -->
+      <form *ngIf="editingAlarmIndex === i" [formGroup]="editForm" (ngSubmit)="saveEdit()" class="section">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label>Parameter*</label>
+            <select formControlName="parameter" class="w-full">
+              <option value="pulse">Pulse</option>
+              <option value="temperature">Temperature</option>
+              <option value="humidity">Humidity</option>
+              <option value="ecg">ECG</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Min value*</label>
+            <input type="number" formControlName="minValue" class="w-full" />
+          </div>
+
+          <div>
+            <label>Max value*</label>
+            <input type="number" formControlName="maxValue" class="w-full" />
+          </div>
+
+          <div>
+            <label>Duration (sec)*</label>
+            <input type="number" formControlName="durationMinutes" class="w-full" />
+          </div>
+
+          <div class="md:col-span-2">
+            <label>Alarm Message*</label>
+            <textarea formControlName="message" class="w-full"></textarea>
+          </div>
+        </div>
+
+        <div class="flex justify-end mt-4 space-x-2">
+          <button mat-flat-button color="primary" type="submit" [disabled]="editForm.invalid">
+            💾 Save
+          </button>
+          <button mat-flat-button color="warn" type="button" (click)="editingAlarmIndex = null">
+            ❌ Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </ng-container>
+
+  <ng-template #noCurrentAlarms>
+    <div class="center">
+      <h2>There are no active alarms!</h2>
+    </div>
+  </ng-template>
+</mat-expansion-panel>
+
+  <!-- History -->
+  <mat-expansion-panel>
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <h2>History</h2>
+      </mat-panel-title>
+      <mat-panel-description>
+        🗃️ All previously configured alarms
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+
+    <div *ngIf="alarms.length > 0; else noAlarms">
+
+        <div *ngFor="let alarm of inactiveAlarms">
+          <section>
+            <p><strong>Parameter:</strong> {{ alarm.parameter }}</p>
+            <p><strong>Min:</strong> {{ alarm.minValue }}</p>
+            <p><strong>Max:</strong> {{ alarm.maxValue }}</p>
+            <p><strong>Duration:</strong> {{ alarm.durationMinutes }} sec</p>
+            <p><strong>Message:</strong> {{ alarm.message }}</p>
+            <p><strong>Is Active:</strong> {{ alarm.isActive ? 'Yes' : 'No' }}</p>
+          </section>
+        </div>
+    </div>
+
+    <ng-template #noAlarms>
+      <div class="center">
+        <h2>There are no alarms yet!</h2>
+      </div>
+    </ng-template>
+  </mat-expansion-panel>
+
+  <!-- Add New -->
+  <mat-expansion-panel>
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <h2>Add New Alarm</h2>
+      </mat-panel-title>
+      <mat-panel-description>
+        ➕ Create a new alarm trigger
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+
+    <form [formGroup]="alarmForm" (ngSubmit)="onSubmit()" class="section">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label>Parameter*</label>
+          <select formControlName="parameter" class="w-full">
+            <option value="pulse">Pulse</option>
+            <option value="temperature">Temperature</option>
+            <option value="humidity">Humidity</option>
+            <option value="ecg">ECG</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Min value*</label>
+          <input type="number" formControlName="minValue" placeholder="Enter threshold" class="w-full" />
+        </div>
+
+        <div>
+          <label>Max value*</label>
+          <input type="number" formControlName="maxValue" placeholder="Enter threshold" class="w-full" />
+        </div>
+
+        <div>
+          <label>Duration (sec)*</label>
+          <input type="number" formControlName="durationMinutes" placeholder="e.g. 30" class="w-full" />
+        </div>
+
+        <div class="md:col-span-2">
+          <label>Alarm Message*</label>
+          <textarea formControlName="message" placeholder="Custom message shown when alarm is triggered" class="w-full"></textarea>
+        </div>
+      </div>
+
+      <div class="flex justify-end mt-4">
+        <button mat-flat-button color="primary" type="submit" [disabled]="alarmForm.invalid">
+          ➕ Save Alarm
+        </button>
+      </div>
+    </form>
+  </mat-expansion-panel>
+
+</div>

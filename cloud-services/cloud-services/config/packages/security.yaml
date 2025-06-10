@@ -1,0 +1,25 @@
+security:
+    password_hashers:
+        App\Entity\Doctor:
+            algorithm: auto
+
+    providers:
+        doctor_provider:
+            entity:
+                class: App\Entity\Doctor
+                property: email
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+
+        api:
+            pattern: ^/api
+            stateless: true
+            jwt: ~
+            provider: doctor_provider
+
+    access_control:
+        - { path: ^/api,       roles: ROLE_DOCTOR }

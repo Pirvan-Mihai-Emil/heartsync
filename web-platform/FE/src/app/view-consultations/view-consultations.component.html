@@ -1,0 +1,236 @@
+<div class="h-24"></div>
+
+<div class="accordion-wrapper">
+
+  <div class="patient-info-card">
+    <h2>👤 Patient Information</h2>
+    <div class="patient-info">
+      <p><strong>Full Name:</strong> {{ patient.firstName }} {{ patient.lastName }}</p>
+      <p><strong>Sex:</strong> {{ patient.sex }}</p>
+      <p><strong>CNP:</strong> {{ patient.cnp }}</p>
+    </div>
+  </div>
+
+  <mat-accordion>
+
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <h2>🩺 Current Conditions & Medication</h2>
+        </mat-panel-title>
+        <mat-panel-description>
+          Ongoing diseases and active medication
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <div *ngIf="patient.diseases?.length || patient.medications?.length; else noConditions" class="view">
+        <section class="section">
+          <h4>🦠 Diseases</h4>
+          <div *ngFor="let disease of patient.diseases" class="disease-card">
+            <strong><mat-icon>coronavirus</mat-icon> {{ disease.name }}</strong>
+            <p>{{ disease.description }}</p>
+          </div>
+        </section>
+
+        <section class="section">
+          <h4>💊 Medications</h4>
+          <div *ngFor="let med of patient.medications" class="med-card">
+            <strong><mat-icon>medication</mat-icon> {{ med.name }}</strong>
+            <div>{{ med.dose }}, {{ med.frequency }} <em>({{ med.route }})</em></div>
+            <div *ngIf="med.notes">📝 {{ med.notes }}</div>
+          </div>
+        </section>
+
+        <section class="section">
+          <h4>🌿 Allergies</h4>
+          <div *ngFor="let allergy of patient.allergies" class="med-card">
+            <strong>
+              <mat-icon style="vertical-align: middle; color: #d32f2f;">warning</mat-icon>
+              {{ allergy.name }}
+            </strong>
+            <p><strong>Severity:</strong> {{ allergy.severity | titlecase }}</p>
+            <p><strong>Active:</strong> {{ allergy.isActive ? 'Yes' : 'No' }}</p>
+            <p><strong>Recorded date:</strong> {{ allergy.recordedDate | date:'mediumDate' }}</p>
+            <p *ngIf="allergy.reaction"><strong>Reaction:</strong> {{ allergy.reaction }}</p>
+            <p *ngIf="allergy.notes"><strong>Notes:</strong> {{ allergy.notes }}</p>
+          </div>
+        </section>
+
+      </div>
+
+      <ng-template #noConditions>
+        <div class="center">
+          <h3>✅ No current conditions or medications recorded.</h3>
+        </div>
+      </ng-template>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <h2>📤 Send Medical Referral</h2>
+        </mat-panel-title>
+        <mat-panel-description>
+          Forward this patient to a specialist or another doctor
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <section class="section">
+        <h4>📋 Fill out the referral form</h4>
+
+        <form class="section grid-form" [formGroup]="referralForm" (ngSubmit)="submitReferral()">
+
+          <!-- To Doctor -->
+          <div class="form-group">
+            <label>👨‍⚕️ To Doctor*</label>
+            <select formControlName="toDoctorId" class="w-full">
+              <option value="" disabled selected>Select a doctor</option>
+              <option *ngFor="let doc of availableDoctors" [value]="doc.id">
+                {{ doc.firstName }} {{ doc.lastName }}
+              </option>
+            </select>
+            <div *ngIf="referralForm.get('toDoctorId')?.invalid && referralForm.get('toDoctorId')?.touched" class="error-message">
+              Please select a doctor.
+            </div>
+          </div>
+
+          <!-- Type -->
+          <div class="form-group">
+            <label>📄 Type*</label>
+            <select formControlName="type" class="w-full">
+              <option value="" disabled selected>Select a referral type</option>
+              <option *ngFor="let type of referralTypes" [value]="type">
+                {{ getReferralTypeLabel(type) }}
+              </option>
+            </select>
+            <div *ngIf="referralForm.get('type')?.invalid && referralForm.get('type')?.touched" class="error-message">
+              Please select a referral type.
+            </div>
+          </div>
+
+          <!-- Reason -->
+          <div class="form-group full-width">
+            <label>📝 Reason*</label>
+            <textarea formControlName="reason" rows="3" class="w-full" placeholder="Enter reason for referral..."></textarea>
+            <div *ngIf="referralForm.get('reason')?.invalid && referralForm.get('reason')?.touched" class="error-message">
+              Please provide a reason for the referral.
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="flex justify-end mt-4 full-width">
+            <button mat-flat-button color="primary" type="submit" [disabled]="referralForm.invalid">
+              💾 Submit Referral
+            </button>
+          </div>
+        </form>
+      </section>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <h2>💊 Add New Medication</h2>
+        </mat-panel-title>
+        <mat-panel-description>
+           Prescribe or record a new medication
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <form [formGroup]="medicationForm" (ngSubmit)="saveEdit()" class="section">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label>Name*</label>
+            <input type="text" formControlName="name" class="w-full" />
+          </div>
+          <div>
+            <label>Dosage*</label>
+            <input type="text" formControlName="dose" class="w-full" />
+          </div>
+          <div>
+            <label>Frequency*</label>
+            <input type="text" formControlName="frequency" class="w-full" />
+          </div>
+          <div>
+            <label>Route*</label>
+            <input type="text" formControlName="route" class="w-full" />
+          </div>
+          <div>
+            <label>Start Date*</label>
+            <input type="date" formControlName="startDate" class="w-full" />
+          </div>
+          <div>
+            <label>End Date</label>
+            <input type="date" formControlName="endDate" class="w-full" />
+          </div>
+          <div class="md:col-span-2">
+            <label>Prescribed By*</label>
+            <input type="text" formControlName="prescribedBy" class="w-full" />
+          </div>
+          <div class="md:col-span-2">
+            <label>Notes</label>
+            <textarea formControlName="notes" class="w-full"></textarea>
+          </div>
+        </div>
+
+        <div class="flex justify-end mt-4">
+          <button mat-flat-button color="primary" type="submit" [disabled]="medicationForm.invalid">
+            💾 Save Changes
+          </button>
+        </div>
+      </form>
+    </mat-expansion-panel>
+
+
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <h2>➕ Add Diagnosis / Condition</h2>
+        </mat-panel-title>
+        <mat-panel-description>
+          Register a new medical condition for the patient
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <form [formGroup]="diagnosisForm" class="diagnosis-form">
+        <div class="diagnosis-card">
+          <div class="form-row">
+            <label for="diagnosis">Diagnosis</label>
+            <app-diagnosis-code (diseaseSelected)="onDiseaseSelected($event)"></app-diagnosis-code>
+          </div>
+
+          <div class="form-row">
+            <label for="icdCode">ICD Code</label>
+            <input id="icdCode" type="text" formControlName="icdCode" readonly />
+          </div>
+
+          <div class="form-row">
+            <label for="category">Category</label>
+            <select id="category" formControlName="category">
+              <option value="">Select</option>
+              <option value="Chronic">Chronic</option>
+              <option value="Genetic">Genetic</option>
+              <option value="Acute">Acute</option>
+              <option value="Autoimmune">Autoimmune</option>
+            </select>
+          </div>
+
+          <div class="form-row full-width">
+            <label for="description">Description</label>
+            <textarea id="description" formControlName="description" placeholder="e.g. Short notes about the condition..."></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" (click)="saveDiagnoses()">💾 Save</button>
+        </div>
+      </form>
+
+      <ng-template #noConditions>
+        <div class="center">
+          <h3>✅ No current conditions or medications recorded.</h3>
+        </div>
+      </ng-template>
+    </mat-expansion-panel>
+  </mat-accordion>
+</div>

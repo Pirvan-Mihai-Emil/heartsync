@@ -1,0 +1,43 @@
+<nav class="navbar">
+  <div class="navbar-left">
+    <video class="logo"
+           src="../assets/logo.mp4"
+           type="video/mp4"
+           loop
+           autoplay
+           [muted]="true">
+    </video>
+  </div>
+  <div class="navbar-right">
+    <button class="btn-auth" (click)="navigateToHelpSection()">
+      <mat-icon>help</mat-icon> Help
+    </button>
+    <button class="btn-home" (click)="navigateToHome()">
+      <mat-icon>home</mat-icon> Home
+    </button>
+
+    <div *ngIf="isAuthenticated">
+      <button class="btn-auth" (click)="navigateToPatientList()">
+        <mat-icon>people</mat-icon>  Patient List
+      </button>
+    </div>
+
+    <div *ngIf="role==='ROLE_ADMIN'">
+      <button class="btn-auth" (click)="navigateToDashboard()">
+        <mat-icon>people</mat-icon> Dashboard
+      </button>
+    </div>
+
+    <ng-container *ngIf="!isAuthenticated; else loggedIn">
+      <button class="btn-auth" (click)="navigateToAuth()">
+        <mat-icon>login</mat-icon> Authenticate
+      </button>
+    </ng-container>
+
+    <ng-template #loggedIn>
+      <button class="btn-logout" (click)="logout()">
+        <mat-icon>logout</mat-icon> Logout
+      </button>
+    </ng-template>
+  </div>
+</nav>
