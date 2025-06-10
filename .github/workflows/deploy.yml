@@ -28,8 +28,11 @@ jobs:
           extensions: mbstring, intl, pdo_mysql, curl
           tools: composer
 
-      - name: Install Composer dependencies (no dev)
-        run: composer install --no-dev --no-interaction --no-progress
+      - name: Install Composer dependencies (no dev, no autoloader)
+        run: composer install --no-dev --no-interaction --no-progress --no-autoloader
+
+      - name: Generate Composer autoloader manually
+        run: composer dump-autoload --no-dev
 
       - name: Clear Symfony cache
         run: php bin/console cache:clear
