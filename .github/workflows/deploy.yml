@@ -1,0 +1,38 @@
+name: Build and Deploy Symfony Project
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      APP_ENV: "prod"
+      APP_SECRET: "72b7c514393707fc6af18d5a59d79098"
+      DATABASE_URL: "mysql://heartsyncadmin:>>x_TcURYp^2xW2@heartsyncserver.mysql.database.azure.com:3306/heartsync?serverVersion=5.7&charset=utf8mb4"
+      JWT_SECRET_KEY: "%kernel.project_dir%/config/jwt/private.pem"
+      JWT_PUBLIC_KEY: "%kernel.project_dir%/config/jwt/public.pem"
+      JWT_PASSPHRASE: "heartsync2025"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, intl, pdo_mysql, curl
+          tools: composer
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Clear Symfony cache
+        run: php bin/console cache:clear
+
+      - name: Run Doctrine Migrations
+        run: php bin/console doctrine:migrations:migrate --no-interaction
