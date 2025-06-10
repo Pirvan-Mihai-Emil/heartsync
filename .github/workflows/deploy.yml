@@ -28,8 +28,8 @@ jobs:
           extensions: mbstring, intl, pdo_mysql, curl
           tools: composer
 
-      - name: Install Composer dependencies
-        run: composer install --prefer-dist --no-dev --no-progress --no-interaction
+      - name: Install Composer dependencies (no dev)
+        run: composer install --no-dev --no-interaction --no-progress
 
       - name: Clear Symfony cache
         run: php bin/console cache:clear
